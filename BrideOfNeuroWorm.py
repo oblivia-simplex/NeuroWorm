@@ -126,7 +126,7 @@ class WormyPhenotype(NEATnet):
 
 	def mate(self, other, predator_ratio=0.0):
 		# parameters for excess, disjoint, and weight difference
-		sex_sound.play()
+		# sex_sound.play()
 		EX  = 1.0
 		DIS = 1.0
 		W   = 1.0
@@ -830,7 +830,7 @@ class Wormosphere:
 						if worm.predator and (not w.predator or not still_prey) and not w.in_heat and not worm.in_heat and not w.newborn:
 							worm.belly.append(w.segments.pop())
 							w.bitten = 100
-							bite_sound.play()
+							#bite_sound.play()
 							
 							print worm.name,"BIT",w.name
 							grow = True
@@ -859,7 +859,7 @@ class Wormosphere:
 				# did the worm eat an apple?
 				for bite in [worm.segments[0], worm.eyes[0], worm.eyes[1]]:
 					if bite in self.apples:
-						apple_sound.play()
+						# apple_sound.play()
 						self.apples.remove(bite)
 						worm.stamina = worm.max_stamina
 						grow = True
@@ -978,15 +978,15 @@ def main():
 		apple_move=0.3
 		music = True
 	
-	pygame.mixer.init()
-	global bite_sound, sex_sound, apple_sound
-	bite_sound = pygame.mixer.Sound("../../soundEffects/Collision8-Bit.ogg")
-	sex_sound = pygame.mixer.Sound("../../soundEffects/laser5.ogg")
-	apple_sound = pygame.mixer.Sound("../../soundEffects/Bloob8Bit.wav")
-	if music:
+	#pygame.mixer.init()
+	#global bite_sound, sex_sound, apple_sound
+	#bite_sound = pygame.mixer.Sound("../../soundEffects/Collision8-Bit.ogg")
+	#sex_sound = pygame.mixer.Sound("../../soundEffects/laser5.ogg")
+	#apple_sound = pygame.mixer.Sound("../../soundEffects/Bloob8Bit.wav")
+	#if music:
 		
-		pygame.mixer.music.load("../../soundEffects/PixiesWhereIsMyMind8BitRemix.ogg")
-		pygame.mixer.music.play(-1,0.0)
+	#	pygame.mixer.music.load("../../soundEffects/PixiesWhereIsMyMind8BitRemix.ogg")
+	#	pygame.mixer.music.play(-1,0.0)
 	W = Wormosphere(population_size=population_size, predator_ratio=predator_ratio, max_pop=max_pop, min_pop=min_pop, apple_count=apple_count, max_stamina=max_stamina, mutation_rate=mutation_rate, starting_length=starting_length, maturity=maturity, inOut=[5,2], cell=7, apple_move=apple_move) # any size cell will do, so long as it's a factor of 700 (5,7,10,20,25). The smaller the cell, the more room the worms will have to roam.  
 	while 1:
 		W.runWormosphere()
