@@ -1,6 +1,5 @@
 from NEAT import * # mine
-
-from bitarray import bitarray
+#from bitarray import bitarray
 import random
 import pylab 
 import numpy as np
@@ -18,9 +17,11 @@ import networkx as nx
 
 class WormyPhenotype(NEATnet):
 
-	def __init__(self, x=0, y=0, inOut=[5,1], starting_length=7, maturity=0, segments=[], gen=0, max_stamina=0.0,mutation_rate=0.3, neurons=[], synapses=[], initial_pop=True, brain=None, predator_ratio=0.0):
-		# we're going to have the phenotype take a bitarray rather than a genome type as genome. no need to use most of genome's attributes or functions here. we'll rebuild them to better suit the task.
-		
+	def __init__(self, x=0, y=0, inOut=[5,1], starting_length=7,
+                     maturity=0, segments=[], gen=0, max_stamina=0.0,
+                     mutation_rate=0.3, neurons=[], synapses=[],
+                     initial_pop=True, brain=None, predator_ratio=0.0):
+
 		self.mutation_rate = mutation_rate
 		self.mutations = 0
 		self.inOut = inOut
@@ -47,10 +48,13 @@ class WormyPhenotype(NEATnet):
 			self.predator = True
 		else:
 			self.predator = False
-		super(WormyPhenotype, self).__init__(inOut, neurons=neurons, synapses=synapses, initial_pop=initial_pop)
+		super(WormyPhenotype, self).__init__(inOut, neurons=neurons,
+		                                     synapses=synapses,
+                                                     initial_pop=initial_pop)
 
-		# if the worm is not one of the initial pop, then it must be a child, and so it's already been passed through the super class (NEAT)
-
+		# if the worm is not one of the initial pop, then it must be a
+		# child, and so it's already been passed through the super class
+		# (NEAT)
 
 		if not segments:
 			self.segments = [[x-i,y] for i in xrange(starting_length)]
@@ -73,14 +77,10 @@ class WormyPhenotype(NEATnet):
 			self.eyes[0],self.eyes[1] = self.eyes[1],self.eyes[0]
 
 	def sensorimotor(self):
-		
-
-
 		obstructed = float(self.obstructed)
-		
 		drone = min(0.5, abs(self.pulse))
-
-		inputs = [self.odour[0], max(self.odour[1],obstructed), self.odour[2], drone]
+		inputs = [self.odour[0], max(self.odour[1],obstructed),
+		          self.odour[2], drone]
 		# switch 1 for self.pulse
 		output = self.feedForward(inputs)
 		self.inclination += np.tanh(output[0])/8 #np.tanh(output[0]/100)/4
@@ -90,12 +90,8 @@ class WormyPhenotype(NEATnet):
 			self.propulsion += np.tanh(output[1])/2
 		else:
 			self.propulsion += np.tanh(output[1])
-
-
-
 		#print inputs,"======>",out
 		threshold = 0.5
-
 
 		if self.inclination < -threshold:
 			rudder = -1
@@ -108,19 +104,22 @@ class WormyPhenotype(NEATnet):
 
 		# EXPERIMENTAL
 
-
 		if abs(self.propulsion) >= threshold:
 			self.go = True
 			self.propulsion = 0.0
 		else:
 			self.go = False
 
-
 		# if random.random() < 0.05 and abs(out)<0.1:
 		# 	rudder = random.choice((-1,0,1))
 
-		# if self.specimen:
-		# 	print str(inputs[0])[:6]+(" "*10)+str(inputs[1])[:7]+" =========> "+(str(self.inclination)+"   ")[:6]+(str(self.propulsion)+"   ")[:6]+" ---> "+str(rudder),str(self.go),"  GEN:",self.gen,f"OFFSPRING:",self.offspring,"CON:",self.connectivity
+		# if self.specimen: print str(inputs[0])[:6]+("
+		# 	"*10)+str(inputs[1])[:7]+" =========>
+		# 	"+(str(self.inclination)+"
+		# 	")[:6]+(str(self.propulsion)+" ")[:6]+" --->
+		# 	"+str(rudder),str(self.go),"
+		# 	GEN:",self.gen,f"OFFSPRING:",self.offspring,"CON:",
+                # self.connectivity
 
 		return rudder
 
@@ -131,10 +130,13 @@ class WormyPhenotype(NEATnet):
 		DIS = 1.0
 		W   = 1.0
 		 
-		# if self.speciesDistance(other, EX, DIS, W) >
-		# 	return
-		# we'll fill all this in later. Not sure what the values should look like yet. For the time being, every worm can mate with every other worm. No speciation yet. 
-		print"With EX = DIS = W = 1.0, the species distance between",self.name,"and",other.name,"=",self.speciesDistance(other, EX, DIS, W)
+		# if self.speciesDistance(other, EX, DIS, W) > return we'll fill
+		# 	all this in later. Not sure what the values should look
+		# 	like yet. For the time being, every worm can mate with
+		# 	every other worm. No speciation yet.
+		print"With EX = DIS = W = 1.0, the species distance", \
+                "between",self.name,"and",other.name,"=", \
+                self.speciesDistance(other, EX, DIS, W)
 		child_schemata = {}
 		child_schemata[self] = self.crossover(other)
 		child_schemata[other] = other.crossover(self)
@@ -143,12 +145,15 @@ class WormyPhenotype(NEATnet):
 		for parent in child_schemata.keys():
 			breakpoint = len(parent.segments)/2
 			
-			child = WormyPhenotype(inOut=parent.inOut, neurons=child_schemata[parent]["neurons"], synapses=child_schemata[parent]["synapses"], initial_pop=False, maturity=self.maturity, segments=parent.segments[breakpoint:] )
+			child = WormyPhenotype(inOut=parent.inOut,
+                                               neurons=child_schemata[parent]["neurons"],
+                                               synapses=child_schemata[parent]["synapses"],
+                                               initial_pop=False,
+                                               maturity=self.maturity,
+                                               segments=parent.segments[breakpoint:] )
 			del parent.segments[breakpoint:]
 			
-			child.gen = max(self.gen,other.gen) +1
-			child.mutations = self.mutations + other.mutations
-			child.mutation_rate = parent.mutation_rate
+			_rate = parent.mutation_rate
 			
 			if random.random() < child.mutation_rate:
 				child.mutate(probWeightVsTopology=0.7)
@@ -185,7 +190,8 @@ class Grid:
 		self.hypoteneuse		= np.sqrt(self.cell_width**2 + self.cell_height**2)
 
 		
-		self.occupying	= [[[] for i in xrange(self.cell_width)] for j in xrange(self.cell_height)]
+		self.occupying = [[[] for i in xrange(self.cell_width)] for j in
+		                  xrange(self.cell_height)]
 		# being an array of lists that contain everything at every cell of the grid. may or may not be useful. 
 
 
@@ -196,13 +202,17 @@ class Grid:
 		return h
 
 	def whereIs(self, item):
-		"""Probably not very efficient, but a function for searching the grid for various items. Returns a list of coordinates at which the item sought can be found."""
+		"""Probably not very efficient (O(n) for n = # of cells),
+                but a function for searching the grid for various items.
+                Returns a list of coordinates at which the item sought can
+                be found."""
 		coords = []
 		for w in xrange(self.width):
 			for h in xrange(self.height):
 				if item in self.occupying[w][h]:
 					coords.append([w,h])
 		return coords
+        # consider using push instead of append, for slightly better efficiency
 
 	def randomCell(self, near=False, how_near=10):
 		if not near:
@@ -222,14 +232,14 @@ class Grid:
 
 		return [x,y]
 
-	
-
-
 class Wormosphere:
 
-	def __init__(self, population_size=0, max_pop=30, min_pop=10, mutation_rate=0.1, cell=10, population=[], starting_length=5, apple_count=12, max_stamina=0.0, maturity=0, inOut=[5,2], apple_move=0.01, predator_ratio=0.0):
+	def __init__(self, population_size=0, max_pop=30, min_pop=10,
+	             mutation_rate=0.1, cell=10, population=[], starting_length=5,
+	             apple_count=12, max_stamina=0.0, maturity=0, inOut=[5,2],
+	             apple_move=0.01, predator_ratio=0.0):
+
 		pygame.init()
-		
 		grid_size = [700/cell, 700/cell, cell]
 		# get names
 		with open("data/names.txt") as f:
@@ -271,9 +281,6 @@ class Wormosphere:
 
 		self.basicfont = pygame.font.SysFont('monospace', 12)
 		self.displaySurf = pygame.display.set_mode((self.grid.window_width, self.grid.window_height))
-		
-
-		
 
 	def drawGrid(self):
 		#             R    G    B
@@ -292,26 +299,36 @@ class Wormosphere:
 		DARKPURPLE = (50,  0,   80)
 		BGCOLOR   = BLACK
 
-		self.displaySurf = pygame.display.set_mode((self.grid.window_width, self.grid.window_height))
+		self.displaySurf = \
+		pygame.display.set_mode((self.grid.window_width,
+		                         self.grid.window_height))
 		self.displaySurf.fill(BGCOLOR)
 
 		for x in xrange(0, self.grid.window_width, self.grid.cell_size):
 			# draw vertical lines
-			pygame.draw.line(self.displaySurf, DARKGRAY, (x,0), (x, self.grid.window_height))
-
+			pygame.draw.line(self.displaySurf,
+                                         DARKGRAY, (x,0), (x, self.grid.window_height))
 		for y in xrange(0, self.grid.window_height, self.grid.cell_size):
 			# draw vertical lines
-			pygame.draw.line(self.displaySurf, DARKGRAY, (0,y), (self.grid.window_width,y))
+			pygame.draw.line(self.displaySurf, DARKGRAY, (0,y),
+			                 (self.grid.window_width,y))
 
 		# draw the worm
 		for worm in self.population:
 			for segment in worm.segments:
-				wormRect = pygame.Rect(segment[0]*self.grid.cell_size, segment[1]*self.grid.cell_size, self.grid.cell_size, self.grid.cell_size)
+				wormRect = \
+				           pygame.Rect(segment[0]*self.grid.cell_size,
+				                segment[1]*self.grid.cell_size,
+				                self.grid.cell_size, self.grid.cell_size)
 			
-				hidden_neurons = (len(worm.neurons)-(len(worm.in_neurons)+len(worm.out_neurons)))
-				colour = (100, min(255, 10*hidden_neurons), min(255, len(worm.belly)*10))
+				hidden_neurons = \
+				                 (len(worm.neurons)-(len(worm.in_neurons)+ \
+                                                    len(worm.out_neurons)))
+				colour = (100, min(255, 10*hidden_neurons),
+                                          min(255, len(worm.belly)*10))
 				if not worm.predator:
-					colour = (min(255, 10*hidden_neurons), 100, min(255, len(worm.belly)*10))
+					colour = (min(255, 10*hidden_neurons),
+                                                  100, min(255, len(worm.belly)*10))
 					EYEWHITE = WHITE
 					if worm.specimen:
 						colour = GREEN
@@ -330,7 +347,8 @@ class Wormosphere:
 							colour = DARKPINK
 						worm.bitten -= 1
 				else:
-					colour = (80, min(255, 10*hidden_neurons), min(255, len(worm.belly)*10))
+					colour = (80, min(255, 10*hidden_neurons),
+                                                  min(255, len(worm.belly)*10))
 					EYEWHITE = PINK
 					if worm.specimen:
 						colour = GREEN
@@ -344,34 +362,53 @@ class Wormosphere:
 						colour = (0,255,255)
 
 
-				pygame.draw.rect(self.displaySurf, colour, wormRect)	
+				pygame.draw.rect(self.displaySurf, colour, wormRect)
 			eyeRects = [0,0]
 			pupilRects = [0,0]
 			eyeWhiteRects = [0,0]
 			eyeInd = 0
 			pupilColour = (min(worm.mutations*10, 255), 0, 0)
 			for eye in worm.eyes:
-				eyeRects[eyeInd] = pygame.Rect(eye[0]*self.grid.cell_size, eye[1]*self.grid.cell_size, self.grid.cell_size, self.grid.cell_size)
-				eyeWhiteRects[eyeInd] = pygame.Rect(eye[0]*self.grid.cell_size+(self.grid.cell_size/5.0), eye[1]*self.grid.cell_size+(self.grid.cell_size/5.0), self.grid.cell_size-(self.grid.cell_size/3.), self.grid.cell_size-(self.grid.cell_size/3.))
-				pupilRects[eyeInd] = pygame.Rect(eye[0]*self.grid.cell_size+(self.grid.cell_size/3.), eye[1]*self.grid.cell_size+(self.grid.cell_size/3.), self.grid.cell_size-2*(self.grid.cell_size/3.), self.grid.cell_size-2*(self.grid.cell_size/3.))
-				pygame.draw.rect(self.displaySurf, colour, eyeRects[eyeInd])
+				eyeRects[eyeInd] = \
+				pygame.Rect(eye[0]*self.grid.cell_size,
+				            eye[1]*self.grid.cell_size,
+                                            self.grid.cell_size,
+				            self.grid.cell_size)
+
+				eyeWhiteRects[eyeInd] = \
+				pygame.Rect(eye[0]*self.grid.cell_size+
+                                            (self.grid.cell_size/5.0),
+				            eye[1]*self.grid.cell_size+
+                                            (self.grid.cell_size/5.0),
+				            self.grid.cell_size-
+                                            (self.grid.cell_size/3.),
+				            self.grid.cell_size-
+                                            (self.grid.cell_size/3.))
+
+                                pupilRects[eyeInd] = pygame.Rect(eye[0]*self.grid.cell_size+(self.grid.cell_size/3.), eye[1]*self.grid.cell_size+(self.grid.cell_size/3.), self.grid.cell_size-2*(self.grid.cell_size/3.), self.grid.cell_size-2*(self.grid.cell_size/3.))
+				pygame.draw.rect(self.displaySurf, colour,
+                                                 eyeRects[eyeInd])
 
 				if random.random() < 0.003:
 					worm.blink = 2
 				if worm.pulse > 0.9 and worm.blink > 0:
 					worm.blink -= 1
-					
-				if worm.blink <= 0:
-					pygame.draw.rect(self.displaySurf, EYEWHITE, eyeWhiteRects[eyeInd])
-					pygame.draw.rect(self.displaySurf, pupilColour, pupilRects[eyeInd])
-				
-				eyeInd += 1
-					
 
+				if worm.blink <= 0:
+					pygame.draw.rect(self.displaySurf,
+                                                         EYEWHITE,
+                                                         eyeWhiteRects[eyeInd])
+					pygame.draw.rect(self.displaySurf,
+                                                         pupilColour,
+                                                         pupilRects[eyeInd])
+				eyeInd += 1
 		for apple in self.apples:
-			appleRect = pygame.Rect(apple[0]*self.grid.cell_size, apple[1]*self.grid.cell_size, self.grid.cell_size, self.grid.cell_size)
+			appleRect = pygame.Rect(apple[0]*self.grid.cell_size,
+			                        apple[1]*self.grid.cell_size,
+                                                self.grid.cell_size,
+			                        self.grid.cell_size)
 			pygame.draw.rect(self.displaySurf, RED, appleRect)
-		
+
 	def makeApples(self):
 
 		applesNeeded = max(0, self.apple_count - len(self.apples)) 
@@ -382,7 +419,8 @@ class Wormosphere:
 			else:
 				near = self.apples[-1]
 				how_near = 10
-			self.apples.append(self.grid.randomCell(near=near, how_near=how_near))
+			self.apples.append(self.grid.randomCell(near=near,
+                                                                how_near=how_near))
 		for apple in self.apples:
 			if random.random() < self.apple_move:
 				c = random.randrange(2)
@@ -416,22 +454,28 @@ class Wormosphere:
 		for i in xrange(self.population_size - len(self.population)):
 
 			while 1:
-				x, y = random.randrange(self.grid_size[0]), random.randrange(self.grid_size[1])
+				x, y = random.randrange(self.grid_size[0]), \
+                                       random.randrange(self.grid_size[1])
 				goodtogo = True
 				for i in xrange(self.starting_length):
-					goodtogo = goodtogo and self.grid.occupying[x-i][y] == []
+					goodtogo = goodtogo and \
+                                                   self.grid.occupying[x-i][y] == []
 				if goodtogo:
 					break
 			# make the Genome
 			# genome = bitarray()
 			# for i in xrange(self.genome_size+1):
 			# 	genome.append(random.randint(0,1))
-			newWorm = WormyPhenotype(x=x, y=y, starting_length=self.starting_length, max_stamina=self.max_stamina, maturity=self.maturity, inOut=self.inOut, mutation_rate=self.mutation_rate, predator_ratio=self.predator_ratio)
+			newWorm = WormyPhenotype(x=x, y=y,
+			                         starting_length=self.starting_length,
+			                         max_stamina=self.max_stamina,
+                                                 maturity=self.maturity,
+			                         inOut=self.inOut,
+                                                 mutation_rate=self.mutation_rate,
+			                         predator_ratio=self.predator_ratio)
 			newWorm.name = (random.choice(self.name_list))
 			self.population.append(newWorm)
 			newWorm =0
-
-
 
 			# for i in xrange(self.starting_length):
 			# 	grid.occupying[x-i][y].append("WORM")
@@ -441,7 +485,6 @@ class Wormosphere:
 		#wormScent = 0.0
 		scent = 0.0
 		N, E, S, W = self.compass
-
 
 		# for worm in self.population:
 		# 	for segment in worm.segments:
@@ -470,31 +513,38 @@ class Wormosphere:
 			if target == []:
 				break
 			if direction == N:
-				if cell[1] <= coords[1] and abs(coords[0] - cell[0]) <= abs(coords[1] - cell[1]):
+				if cell[1] <= coords[1] and abs(coords[0] - cell[0]) \
+                                   <= abs(coords[1] - cell[1]):
 					canSmell = True
-					totalScent += self.grid.distance(cell, coords)/self.grid.hypoteneuse
+					totalScent += self.grid.distance(cell,
+                                                                         coords)\
+                                                                         /self.grid.hypoteneuse
 					#print direction, canSmell
 			elif direction == E:
-				if cell[0] >= coords[0] and abs(coords[0] - cell[0]) >= abs(coords[1] - cell[1]):
+				if cell[0] >= coords[0] and abs(coords[0] -
+				                                cell[0]) >= abs(coords[1] - cell[1]):
 					canSmell = True
-					totalScent += self.grid.distance(cell, coords)/self.grid.hypoteneuse
+					totalScent += self.grid.distance(cell,
+					                                 coords)/self.grid.hypoteneuse
 					#print direction, canSmell
 			elif direction == S:
-				if cell[1] >= coords[1] and abs(coords[0] - cell[0]) <= abs(coords[1] - cell[1]):
+				if cell[1] >= coords[1] and abs(coords[0] -
+				                                cell[0]) <= abs(coords[1] - cell[1]):
 					canSmell = True
-					totalScent += self.grid.distance(cell, coords)/self.grid.hypoteneuse
+					totalScent += self.grid.distance(cell,
+					                                 coords)/self.grid.hypoteneuse
 					#print direction, canSmell
 			elif direction == W:
-				if cell[0] <= coords[0] and abs(coords[0] - cell[0]) >= abs(coords[1] - cell[1]):
+				if cell[0] <= coords[0] \
+                                   and abs(coords[0] - cell[0]) >= abs(coords[1]
+                                                                       - cell[1]):
 					canSmell = True
-					totalScent += self.grid.distance(cell, coords)/self.grid.hypoteneuse
-					#print direction, canSmell
-		
+					totalScent += self.grid.distance(cell,
+                                                                         coords)/self.grid.hypoteneuse
 		if target == [] or not canSmell:
 			scent = 0.0
 		else:
 			scent = 1-(totalScent / len(target))
-			
 		return scent
 
 
@@ -517,9 +567,6 @@ class Wormosphere:
 
 	def moveWorm(self, worm):
 		N, E, S, W = self.compass
-
-
-
 		# if worm.direction == N:
 		#     newHead = [worm.segments[0][0], worm.segments[0][1] - 1]
 		# elif worm.direction == S:
@@ -539,28 +586,27 @@ class Wormosphere:
 
 		worm.moved = True
 
-	def neuroGraph(self, specimen ,node_size=2000, node_color='green', node_alpha=0.6, node_text_size=12, edge_color='black', edge_alpha=0.6, edge_tickness=1, edge_text_pos=0.3, text_font='ubuntumono'):
-		
+	def neuroGraph(self, specimen ,node_size=2000, node_color='green',
+	               node_alpha=0.6, node_text_size=12, edge_color='black',
+                       edge_alpha=0.6, edge_tickness=1, edge_text_pos=0.3,
+                       text_font='ubuntumono'):
 		pylab.clf()
 		# create networkx (directed) graph
 		G=nx.DiGraph()
-
 		print"\nSpecimen:",specimen.name
 		for synapse in specimen.synapses:
 			print synapse,
 		print "\n"
 		# extract nodes from graph
-
 		nodes = set(neuron.ID for neuron in specimen.neurons)
 		#set([n1 for n1, n2 in graph] + [n2 for n1, n2 in graph])
-
-		
 
 		# add nodes
 		for node in nodes:
 			G.add_node(node)
 
-		words = ["L.EYE","NOSE", "TAIL", "R.EYE","PULSE","RUDDER","SPEED"]+range(7,len(nodes))
+		words = ["L.EYE","NOSE", "TAIL",
+		         "R.EYE","PULSE","RUDDER","SPEED"]+range(7,len(nodes))
 		node_labels = {}
 		for i in xrange(len(nodes)):
 			node_labels[i] = str(words[i])
@@ -569,33 +615,37 @@ class Wormosphere:
 		# add edges
 		for synapse in specimen.synapses:
 			if synapse.enabled:
-				G.add_edge(synapse.source.ID, synapse.target.ID, w=float(str(synapse.weight)[:10]))
+				G.add_edge(synapse.source.ID, synapse.target.ID,
+				           w=float(str(synapse.weight)[:10]))
 
 		edge_labels = nx.get_edge_attributes(G,'w')
 		#print edge_labels
-
-
 		# draw graph
 		pos = nx.shell_layout(G)
-		nx.draw_networkx_edge_labels(G, pos, label_pos=0.5, font_weight="bold", bbox={"facecolor":"none", "edgecolor":"none"})
-		nx.draw_networkx_labels(G, pos, node_labels, font_size=10, font_color='k', alpha=edge_alpha)
-		nx.draw_networkx_nodes(G, pos, nodelist[:5], alpha=node_alpha, node_size=node_size, node_color='g', node_shape='h')
-		nx.draw_networkx_nodes(G, pos, nodelist[5:7],alpha=node_alpha, node_size=node_size, node_color='b', node_shape='h') 
-		nx.draw_networkx_nodes(G, pos, nodelist[7:], alpha=node_alpha, node_size=node_size, node_color='c', node_shape='h')  # so^>v<dph8
+		nx.draw_networkx_edge_labels(G, pos, label_pos=0.5,
+		                             font_weight="bold", bbox={"facecolor":"none",
+		                                                       "edgecolor":"none"})
+		nx.draw_networkx_labels(G, pos, node_labels, font_size=10,
+		                        font_color='k', alpha=edge_alpha)
+		nx.draw_networkx_nodes(G, pos, nodelist[:5], alpha=node_alpha,
+		                       node_size=node_size, node_color='g', node_shape='h')
+		nx.draw_networkx_nodes(G, pos, nodelist[5:7],alpha=node_alpha,
+		                       node_size=node_size, node_color='b', node_shape='h') 
+		nx.draw_networkx_nodes(G, pos, nodelist[7:], alpha=node_alpha,
+		                       node_size=node_size, node_color='c', node_shape='h')  # so^>v<dph8
 		nx.draw_networkx_edges(G, pos, alpha=edge_alpha)
 
-	
 		#nx.draw(G, pos, node_size=node_size)
 		# show graph
 		pylab.axis("off")
 		pylab.title(specimen.name)
 		pylab.draw()
-		
+
 
 	def specimenData(self):
-		"""Displays some information about the currently selected worm, at the top of the gamespace window."""
-		
-		
+		"""Displays some information about the currently selected worm,
+                at the top of the gamespace window."""
+
 		specimenSurf = self.basicfont.render("%(name)s SENSE: %(odr)s  [IN: %(IN)s  HID: %(HID)s  OUT: %(OUT)s  SYN: %(syn)s]   GEN: %(gen)s SPAWN: %(kids)s   FOOD: %(food)s POP: %(pop)s" %{'name':(self.theSpecimen.name[:11]+":"+" "*9)[:12],
 				'gen': self.theSpecimen.gen, 
 				'kids': self.theSpecimen.offspring, 
@@ -639,7 +689,6 @@ class Wormosphere:
 	def runWormosphere(self):
 		pylab.ion()
 		pygame.display.set_caption("BRIDE OF NEUROWORM")
-		
 		# initialize some variables
 		spec = random.choice(self.population)
 
@@ -649,7 +698,11 @@ class Wormosphere:
 		justDid = 0
 		# some syntactic sugar:
 		N, E, S, W = self.compass
-		# i.e. [(0,-1),(1,0),(0,1),(-1,0)] represents the four directions. The idea being that N is a negative movement on the y axis, E is a positive movement on the x axis, etc... This is handy because you can reverse directions by multiplying any of these by (-1,-1). In fact:
+		# i.e. [(0,-1),(1,0),(0,1),(-1,0)] represents the four
+		# directions. The idea being that N is a negative movement on
+		# the y axis, E is a positive movement on the x axis, etc...
+		# This is handy because you can reverse directions by
+		# multiplying any of these by (-1,-1). In fact:
 		reverse = lambda d: (d[0] * -1, d[1] * -1)
 
 		fertility = 0
@@ -662,11 +715,8 @@ class Wormosphere:
 		# DARKGREEN = (  0, 155,   0)
 		# DARKGRAY  = ( 40,  40,  40)
 		# BGCOLOR   = BLACK
-		
+
 		while 1:
-
-
-			
 			self.timer += 1
 			if self.timer % 1000 == 0:
 				neuron_count = [len(w.neurons) for w in self.population]
@@ -677,7 +727,7 @@ class Wormosphere:
 				max_neuron_count = max(neuron_count)
 				print"Population:",len(self.population)
 				print"Average number of neurons per worm:",avg_neuron_count
-				print"Average number of synapses per worm:",avg_syn_count		
+				print"Average number of synapses per worm:",avg_syn_count
 				print"Highest neuron count:",max_neuron_count
 				print"Highest synapse count:", max_syn_count
 
@@ -690,7 +740,7 @@ class Wormosphere:
 
 			if self.timer % (self.max_stamina/3) == 0:
 				self.popRegulate()
-			
+
 			self.makeApples()
 
 			for event in pygame.event.get(): # event handling loop
@@ -699,21 +749,17 @@ class Wormosphere:
 
 				elif event.type == KEYDOWN and event.key == K_ESCAPE:
 					self.terminate()
-
-			
 		### for moving
 			for worm in self.population:
 				grow = False
 				if self.timer % 500 == 0:
 					if worm.newborn:
-
 						self.infancy(worm)
-
-
 				if pygame.mouse.get_pressed()[0] == True:
-
 					mouse_x, mouse_y = pygame.mouse.get_pos()
-					mouse_x, mouse_y = int(mouse_x / self.grid.cell_size), int(mouse_y / self.grid.cell_size)
+					mouse_x, mouse_y = int(mouse_x /
+					                       self.grid.cell_size),
+                                        int(mouse_y / self.grid.cell_size)
 
 					for w in self.population:
 						if [mouse_x, mouse_y] in w.segments:
@@ -728,7 +774,10 @@ class Wormosphere:
 				if pygame.mouse.get_pressed()[1] == True:
 
 					mouse_x, mouse_y = pygame.mouse.get_pos()
-					mouse_x, mouse_y = int(mouse_x / self.grid.cell_size), int(mouse_y / self.grid.cell_size)
+					mouse_x, mouse_y = int(mouse_x /
+					                       self.grid.cell_size), \
+                                                               int(mouse_y /
+                                                                   self.grid.cell_size)
 
 					for w in self.population:
 						if [mouse_x, mouse_y] in w.segments:
@@ -789,15 +838,14 @@ class Wormosphere:
 
 				worm.odour = [self.scentsAt(worm.eyes[0],worm.direction, seeking=food), self.scentsAt(worm.segments[0], worm.direction, seeking="worm"), self.scentsAt(worm.segments[-1], reverse(worm.direction), seeking="predator"), self.scentsAt(worm.eyes[1], worm.direction,seeking=food)]
 				#print worm.odour
-				
+
 				## THE SENSORIMOTOR FUNCTION ##
 				worm.pulse = np.sin(self.timer)
 				if not worm.human:
 					rudder = worm.sensorimotor()
 				else:
 					worm.go = True
-					
-					
+
 				#print "rudder:",rudder
 
 				directionIndex = self.compass.index(worm.direction)
@@ -821,7 +869,7 @@ class Wormosphere:
 
 
 						if worm.in_heat and w.in_heat:
-							
+
 							children = worm.mate(w, self.predator_ratio)
 							for child in children:
 								child.name = random.choice(self.name_list)
@@ -831,7 +879,7 @@ class Wormosphere:
 							worm.belly.append(w.segments.pop())
 							w.bitten = 100
 							#bite_sound.play()
-							
+
 							print worm.name,"BIT",w.name
 							grow = True
 							worm.obstructed = False
@@ -855,7 +903,7 @@ class Wormosphere:
 				elif worm.segments[0][1] == self.grid.cell_height:
 					worm.segments[0][1] = 0
 
-				
+
 				# did the worm eat an apple?
 				for bite in [worm.segments[0], worm.eyes[0], worm.eyes[1]]:
 					if bite in self.apples:
@@ -874,7 +922,7 @@ class Wormosphere:
 				# did the worm reach cloning size? Reproduction. 
 				if len(worm.segments) >= worm.maturity and len(self.population) <= self.max_pop:
 					worm.in_heat = True
-					
+
 				# is the worm starving?
 				if worm.stamina <= 0. and len(worm.segments) > 1:
 					worm.stamina = worm.max_stamina
@@ -889,18 +937,16 @@ class Wormosphere:
 
 				# stress-induced mutations
 				# elif len(worm.segments) == 2 and worm.mutations < len(worm.belly)+3 :
-					
+
 				# 	worm.mutate(probability=0.5)
 
 			######### make the picture
-			
-			
-			
+
 			# N = 10000
 			# if timer > N:
 			self.drawGrid()
 			self.specimenData()
-			
+
 			pygame.display.update()
 			# 	print timer
 			# else:
@@ -912,8 +958,6 @@ class Wormosphere:
 ####################
 ## USER INTERFACE ##
 ####################
-
-
 
 
 def getNumAnswer(nameOfValue, answerType=int):
@@ -987,9 +1031,23 @@ def main():
 		
 	#	pygame.mixer.music.load("../../soundEffects/PixiesWhereIsMyMind8BitRemix.ogg")
 	#	pygame.mixer.music.play(-1,0.0)
-	W = Wormosphere(population_size=population_size, predator_ratio=predator_ratio, max_pop=max_pop, min_pop=min_pop, apple_count=apple_count, max_stamina=max_stamina, mutation_rate=mutation_rate, starting_length=starting_length, maturity=maturity, inOut=[5,2], cell=7, apple_move=apple_move) # any size cell will do, so long as it's a factor of 700 (5,7,10,20,25). The smaller the cell, the more room the worms will have to roam.  
+	W = Wormosphere(population_size=population_size,
+	                predator_ratio=predator_ratio,
+                        max_pop=max_pop,
+                        min_pop=min_pop,
+	                apple_count=apple_count,
+                        max_stamina=max_stamina,
+	                mutation_rate=mutation_rate,
+                        starting_length=starting_length,
+	                maturity=maturity,
+                        inOut=[5,2],
+                        cell=7,
+                        apple_move=apple_move)
+        # any size cell will do, so long as it's a factor of 700 (5,7,10,20,25).
+	# The smaller the cell, the more room the worms will have to roam.
 	while 1:
 		W.runWormosphere()
 
-# stamina sharing by touch should also be optional. interesting to compare its effects with the effects of its absence.
+# stamina sharing by touch should also be optional. interesting to compare its
+# effects with the effects of its absence.
 main()
