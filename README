@@ -32,3 +32,13 @@ a set frequency, but is random (a cannibal child can be born to non-cannibal
 parents, and vice versa).
 
 Have fun!
+
+>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<
+
+PS: to install the dependencies, use:
+
+pip2 install matplotlib
+
+and get pylab from your favourite repository.
+
+>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<
